@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS products (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    stock INT NOT NULL DEFAULT 0,
+    code_barre VARCHAR(50) NOT NULL UNIQUE,
+    barcode VARCHAR(50) UNIQUE,
+    barcode_image_path VARCHAR(255),
+    is_visible BOOLEAN DEFAULT TRUE,
+    category_id BIGINT,
+    tax_id BIGINT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(id),
+    FOREIGN KEY (tax_id) REFERENCES taxes(id)
+);
+
+CREATE TABLE IF NOT EXISTS customers (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(20),
+    address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+); 

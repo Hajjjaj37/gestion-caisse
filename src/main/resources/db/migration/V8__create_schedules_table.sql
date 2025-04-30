@@ -1,0 +1,25 @@
+CREATE TABLE IF NOT EXISTS schedules (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    work_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    total_hours DOUBLE,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS work_breaks (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME NOT NULL,
+    break_type VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES users(id)
+); 

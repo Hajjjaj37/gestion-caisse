@@ -6,42 +6,42 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Entity
+@Table(name = "suppliers")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "order_items")
-public class OrderItem {
+public class Supplier {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
     @Column(nullable = false)
-    private Integer quantity;
+    private String name;
 
-    @Column(name = "unit_price", nullable = false)
-    private BigDecimal unitPrice;
+    @Column(name = "contact_person")
+    private String contactPerson;
 
-    @Column(name = "total_price", nullable = false)
-    private BigDecimal totalPrice;
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    private String phone;
+    private String address;
+    private String city;
+    private String country;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL)
+    private List<Product> products;
 
     @PrePersist
     protected void onCreate() {

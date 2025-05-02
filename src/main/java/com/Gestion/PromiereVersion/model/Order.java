@@ -8,34 +8,47 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "order_items")
-public class OrderItem {
+@Table(name = "orders")
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @Column(name = "order_number", nullable = false, unique = true)
+    private String orderNumber;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
+    @Column(name = "total_amount", nullable = false)
+    private BigDecimal totalAmount;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private String status;
 
-    @Column(name = "unit_price", nullable = false)
-    private BigDecimal unitPrice;
+    @Column(name = "payment_status", nullable = false)
+    private String paymentStatus;
 
-    @Column(name = "total_price", nullable = false)
-    private BigDecimal totalPrice;
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    @OneToOne
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -16,7 +16,8 @@ public class CustomerService {
 
     public Customer createCustomer(CustomerDTO customerDTO) {
         Customer customer = Customer.builder()
-                .name(customerDTO.getName())
+                .firstName(customerDTO.getFirstName())
+                .lastName(customerDTO.getLastName())
                 .email(customerDTO.getEmail())
                 .phone(customerDTO.getPhone())
                 .address(customerDTO.getAddress())
@@ -35,7 +36,8 @@ public class CustomerService {
 
     public Customer updateCustomer(Long id, CustomerDTO customerDTO) {
         Customer customer = getCustomerById(id);
-        customer.setName(customerDTO.getName());
+        customer.setFirstName(customerDTO.getFirstName());
+        customer.setLastName(customerDTO.getLastName());
         customer.setEmail(customerDTO.getEmail());
         customer.setPhone(customerDTO.getPhone());
         customer.setAddress(customerDTO.getAddress());

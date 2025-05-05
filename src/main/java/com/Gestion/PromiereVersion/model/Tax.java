@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "taxes")
 @Data
@@ -20,8 +22,8 @@ public class Tax {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private Double rate;
+    @Column(nullable = false, precision = 5, scale = 2)
+    private BigDecimal rate;
 
     private String description;
 } 

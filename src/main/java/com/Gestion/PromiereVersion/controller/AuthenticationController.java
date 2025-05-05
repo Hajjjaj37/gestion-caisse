@@ -43,20 +43,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
-        try {
-            log.info("Attempting to login user with email: {}", request.getEmail());
-            AuthenticationResponse response = authenticationService.authenticate(request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            log.error("Login error: {}", e.getMessage());
-            ErrorResponse errorResponse = ErrorResponse.builder()
-                    .message(e.getMessage())
-                    .error("Bad Request")
-                    .status(HttpStatus.BAD_REQUEST.value())
-                    .build();
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+        return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 
     @PostMapping("/register/admin")

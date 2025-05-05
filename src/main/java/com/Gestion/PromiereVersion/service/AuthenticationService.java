@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Slf4j
 @Service
@@ -67,6 +68,7 @@ public class AuthenticationService {
         
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .role(user.getRole().name())
                 .build();
     }
 
@@ -111,6 +113,7 @@ public class AuthenticationService {
             var jwtToken = jwtService.generateToken(user);
             return AuthenticationResponse.builder()
                     .token(jwtToken)
+                    .role(user.getRole().name())
                     .build();
         } catch (RuntimeException e) {
             log.error("Authentication error: {}", e.getMessage());

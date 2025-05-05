@@ -26,41 +26,51 @@ public class VacationService {
 
     @Transactional
     public VacationDTO createVacation(VacationDTO vacationDTO) {
-        log.info("Creating vacation for employee: {}", vacationDTO.getEmployeeId());
-        
-        User employee = userRepository.findById(vacationDTO.getEmployeeId())
-                .orElseThrow(() -> new IllegalArgumentException("Employee not found"));
+        log.info("Création d'une nouvelle demande de vacances: {}", vacationDTO);
 
-        if (vacationDTO.getEndDate().isBefore(vacationDTO.getStartDate())) {
-            throw new IllegalArgumentException("End date cannot be before start date");
+        // Validation des dates
+        if (vacationDTO.getStartDate().isAfter(vacationDTO.getEndDate())) {
+            throw new IllegalArgumentException("La date de début doit être antérieure à la date de fin");
         }
 
-        int duration = (int) ChronoUnit.DAYS.between(vacationDTO.getStartDate(), vacationDTO.getEndDate()) + 1;
+        // Calcul de la durée
+        long days = ChronoUnit.DAYS.between(vacationDTO.getStartDate(), vacationDTO.getEndDate()) + 1;
+        vacationDTO.setDuration((int) days);
 
+        // Récupération de l'employé
+        User employee = userRepository.findById(vacationDTO.getEmployeeId())
+                .orElseThrow(() -> new IllegalArgumentException("Employé non trouvé"));
+
+        // Création de la demande de vacances
         Vacation vacation = Vacation.builder()
                 .employee(employee)
                 .startDate(vacationDTO.getStartDate())
                 .endDate(vacationDTO.getEndDate())
-                .duration(duration)
+                .duration(vacationDTO.getDuration())
                 .status(VacationStatus.PENDING)
                 .comment(vacationDTO.getComment())
                 .build();
 
+        // Sauvegarde
         Vacation savedVacation = vacationRepository.save(vacation);
+        log.info("Demande de vacances créée avec succès: {}", savedVacation);
+
         return VacationDTO.fromVacation(savedVacation);
     }
 
     @Transactional
     public VacationDTO updateVacationStatus(Long id, VacationStatus status, String comment) {
-        log.info("Updating vacation status for id {}: {}", id, status);
+        log.info("Mise à jour du statut de la demande de vacances {}: {}", id, status);
 
         Vacation vacation = vacationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Vacation not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Demande de vacances non trouvée"));
 
         vacation.setStatus(status);
         vacation.setComment(comment);
 
         Vacation updatedVacation = vacationRepository.save(vacation);
+        log.info("Statut de la demande de vacances mis à jour: {}", updatedVacation);
+
         return VacationDTO.fromVacation(updatedVacation);
     }
 
@@ -86,23 +96,5 @@ public class VacationService {
         return vacationRepository.findByEmployeeIdAndStartDateBetween(employeeId, start, end).stream()
                 .map(VacationDTO::fromVacation)
                 .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public void deleteEmployeeVacations(Long employeeId) {
-        log.info("Deleting all vacations for employee: {}", employeeId);
-        List<Vacation> vacations = vacationRepository.findByEmployeeId(employeeId);
-        vacationRepository.deleteAll(vacations);
-        log.info("Deleted {} vacations for employee {}", vacations.size(), employeeId);
-    }
-
-    @Transactional
-    public void deleteVacation(Long vacationId) {
-        log.info("Deleting vacation: {}", vacationId);
-        if (!vacationRepository.existsById(vacationId)) {
-            throw new IllegalArgumentException("Vacation not found");
-        }
-        vacationRepository.deleteById(vacationId);
-        log.info("Vacation {} deleted successfully", vacationId);
     }
 } 

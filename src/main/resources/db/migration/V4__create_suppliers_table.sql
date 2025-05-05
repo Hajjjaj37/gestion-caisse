@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS suppliers (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(20),
+    address TEXT,
+    company_name VARCHAR(255),
+    tax_number VARCHAR(50) UNIQUE,
+    bank_account VARCHAR(50),
+    payment_terms VARCHAR(100),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+); 

@@ -8,6 +8,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 @Component
 @RequiredArgsConstructor
 public class DataInitializer {
@@ -43,13 +45,13 @@ public class DataInitializer {
         if (taxRepository.count() == 0) {
             Tax tva = Tax.builder()
                     .name("TVA")
-                    .rate(20.0)
+                    .rate(new BigDecimal("20.00"))
                     .description("Taxe sur la valeur ajoutée")
                     .build();
 
             Tax ecoTax = Tax.builder()
                     .name("Éco-taxe")
-                    .rate(5.0)
+                    .rate(new BigDecimal("5.00"))
                     .description("Taxe écologique")
                     .build();
 

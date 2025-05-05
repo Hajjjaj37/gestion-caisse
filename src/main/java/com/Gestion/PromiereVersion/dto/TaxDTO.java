@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class TaxDTO {
     private Long id;
     private String name;
-    private Double rate;
+    private BigDecimal rate;
     private String description;
 
     public static TaxDTO fromTax(Tax tax) {

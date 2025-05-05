@@ -1,5 +1,6 @@
 package com.Gestion.PromiereVersion.dto;
 
+import com.Gestion.PromiereVersion.model.PaymentMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,19 +15,11 @@ import java.util.List;
 @AllArgsConstructor
 public class PaymentRequestDTO {
     private Long customerId;
-    private String paymentMethod;
-    private String notes;
-    private List<OrderItemRequestDTO> items;
-    private BigDecimal totalAmount;
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class OrderItemRequestDTO {
-        private Long productId;
-        private Integer quantity;
-        private BigDecimal unitPrice;
-        private BigDecimal totalPrice;
-    }
+    private BigDecimal amount;
+    private PaymentMethod paymentMethod;
+    private String cardNumber;  // For card payments
+    private String cardHolderName;
+    private String expiryDate;
+    private String cvv;
+    private List<PaymentProductDTO> products;
 } 

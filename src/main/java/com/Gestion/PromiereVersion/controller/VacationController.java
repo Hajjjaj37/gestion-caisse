@@ -23,8 +23,19 @@ public class VacationController {
     private final VacationService vacationService;
 
     @PostMapping
-    public ResponseEntity<VacationDTO> createVacation(@RequestBody VacationDTO vacationDTO) {
-        return ResponseEntity.ok(vacationService.createVacation(vacationDTO));
+    public ResponseEntity<?> createVacation(@RequestBody VacationDTO vacationDTO) {
+        try {
+            log.info("Tentative de création d'une demande de vacances: {}", vacationDTO);
+            VacationDTO createdVacation = vacationService.createVacation(vacationDTO);
+            return ResponseEntity.ok(createdVacation);
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de la création de la demande de vacances: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(ErrorResponse.builder()
+                    .message(e.getMessage())
+                    .error("Bad Request")
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .build());
+        }
     }
 
     @PutMapping("/{id}/status")
@@ -63,23 +74,11 @@ public class VacationController {
         return ResponseEntity.ok(vacationService.getVacationsBetweenDates(start, end));
     }
 
-    @GetMapping("/employee/{employeeId}/between")
+    @GetMapping("/employee/{employeeId}/dates")
     public ResponseEntity<List<VacationDTO>> getEmployeeVacationsBetweenDates(
             @PathVariable Long employeeId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         return ResponseEntity.ok(vacationService.getEmployeeVacationsBetweenDates(employeeId, start, end));
-    }
-
-    @DeleteMapping("/employee/{employeeId}")
-    public ResponseEntity<Void> deleteEmployeeVacations(@PathVariable Long employeeId) {
-        vacationService.deleteEmployeeVacations(employeeId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{vacationId}")
-    public ResponseEntity<Void> deleteVacation(@PathVariable Long vacationId) {
-        vacationService.deleteVacation(vacationId);
-        return ResponseEntity.noContent().build();
     }
 } 

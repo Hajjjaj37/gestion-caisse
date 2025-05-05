@@ -17,12 +17,6 @@ public class TaxController {
 
     private final TaxService taxService;
 
-    @PostMapping
-    public ResponseEntity<TaxDTO> createTax(@RequestBody TaxDTO taxDTO) {
-        Tax tax = taxService.createTax(taxDTO);
-        return ResponseEntity.ok(TaxDTO.fromTax(tax));
-    }
-
     @GetMapping
     public ResponseEntity<List<TaxDTO>> getAllTaxes() {
         List<Tax> taxes = taxService.getAllTaxes();
@@ -35,6 +29,12 @@ public class TaxController {
     @GetMapping("/{id}")
     public ResponseEntity<TaxDTO> getTaxById(@PathVariable Long id) {
         Tax tax = taxService.getTaxById(id);
+        return ResponseEntity.ok(TaxDTO.fromTax(tax));
+    }
+
+    @PostMapping
+    public ResponseEntity<TaxDTO> createTax(@RequestBody TaxDTO taxDTO) {
+        Tax tax = taxService.createTax(taxDTO);
         return ResponseEntity.ok(TaxDTO.fromTax(tax));
     }
 

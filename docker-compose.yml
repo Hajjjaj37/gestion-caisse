@@ -6,7 +6,7 @@ services:
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: gestion
+      MYSQL_DATABASE: gestion_stock
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:

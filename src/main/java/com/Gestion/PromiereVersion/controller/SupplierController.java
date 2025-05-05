@@ -1,10 +1,11 @@
 package com.Gestion.PromiereVersion.controller;
 
-import com.Gestion.PromiereVersion.dto.SupplierDTO;
+import com.Gestion.PromiereVersion.dto.ProductDTO;
+import com.Gestion.PromiereVersion.dto.SupplierRequestDTO;
+import com.Gestion.PromiereVersion.dto.SupplierResponseDTO;
 import com.Gestion.PromiereVersion.service.SupplierService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,37 +14,36 @@ import java.util.List;
 @RequestMapping("/api/suppliers")
 @RequiredArgsConstructor
 public class SupplierController {
-
     private final SupplierService supplierService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SupplierDTO> createSupplier(@RequestBody SupplierDTO supplierDTO) {
-        return ResponseEntity.ok(supplierService.createSupplier(supplierDTO));
+    public ResponseEntity<SupplierResponseDTO> createSupplier(@RequestBody SupplierRequestDTO request) {
+        return ResponseEntity.ok(supplierService.createSupplier(request));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<List<SupplierDTO>> getAllSuppliers() {
+    public ResponseEntity<List<SupplierResponseDTO>> getAllSuppliers() {
         return ResponseEntity.ok(supplierService.getAllSuppliers());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<SupplierDTO> getSupplierById(@PathVariable Long id) {
+    public ResponseEntity<SupplierResponseDTO> getSupplierById(@PathVariable Long id) {
         return ResponseEntity.ok(supplierService.getSupplierById(id));
     }
 
+    @GetMapping("/{id}/products")
+    public ResponseEntity<List<ProductDTO>> getSupplierProducts(@PathVariable Long id) {
+        return ResponseEntity.ok(supplierService.getSupplierProducts(id));
+    }
+
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SupplierDTO> updateSupplier(
+    public ResponseEntity<SupplierResponseDTO> updateSupplier(
             @PathVariable Long id,
-            @RequestBody SupplierDTO supplierDTO) {
-        return ResponseEntity.ok(supplierService.updateSupplier(id, supplierDTO));
+            @RequestBody SupplierRequestDTO request) {
+        return ResponseEntity.ok(supplierService.updateSupplier(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteSupplier(@PathVariable Long id) {
         supplierService.deleteSupplier(id);
         return ResponseEntity.ok().build();

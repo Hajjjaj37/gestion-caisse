@@ -1,7 +1,30 @@
--- Supprimer d'abord toutes les contraintes de clé étrangère
-ALTER TABLE schedule_breaksets DROP FOREIGN KEY schedule_breaksets_ibfk_1;
-ALTER TABLE schedule_days DROP FOREIGN KEY schedule_days_ibfk_1;
-ALTER TABLE recurring_breaks DROP FOREIGN KEY recurring_breaks_ibfk_1;
+-- Supprimer d'abord toutes les contraintes de clé étrangère si elles existent
+SET @constraint_exists = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS 
+    WHERE CONSTRAINT_SCHEMA = DATABASE() 
+    AND TABLE_NAME = 'schedule_breaksets' 
+    AND CONSTRAINT_NAME = 'schedule_breaksets_ibfk_1');
+SET @sql = IF(@constraint_exists > 0, 'ALTER TABLE schedule_breaksets DROP FOREIGN KEY schedule_breaksets_ibfk_1', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @constraint_exists = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS 
+    WHERE CONSTRAINT_SCHEMA = DATABASE() 
+    AND TABLE_NAME = 'schedule_days' 
+    AND CONSTRAINT_NAME = 'schedule_days_ibfk_1');
+SET @sql = IF(@constraint_exists > 0, 'ALTER TABLE schedule_days DROP FOREIGN KEY schedule_days_ibfk_1', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @constraint_exists = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS 
+    WHERE CONSTRAINT_SCHEMA = DATABASE() 
+    AND TABLE_NAME = 'recurring_breaks' 
+    AND CONSTRAINT_NAME = 'recurring_breaks_ibfk_1');
+SET @sql = IF(@constraint_exists > 0, 'ALTER TABLE recurring_breaks DROP FOREIGN KEY recurring_breaks_ibfk_1', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- Supprimer les tables existantes dans le bon ordre
 DROP TABLE IF EXISTS recurring_schedule_breaks;

@@ -5,10 +5,10 @@ CREATE TABLE IF NOT EXISTS schedule_days (
     FOREIGN KEY (schedule_id) REFERENCES recurring_schedules(id)
 );
 
+-- Cette table sera modifiée plus tard pour ajouter la référence à recurring_breaks
 CREATE TABLE IF NOT EXISTS schedule_breaksets (
     schedule_id BIGINT NOT NULL,
     break_id BIGINT NOT NULL,
     PRIMARY KEY (schedule_id, break_id),
-    FOREIGN KEY (schedule_id) REFERENCES recurring_schedules(id),
-    FOREIGN KEY (break_id) REFERENCES recurring_breaks(id)
+    FOREIGN KEY (schedule_id) REFERENCES recurring_schedules(id)
 ); 

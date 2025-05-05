@@ -1,14 +1,14 @@
 package com.Gestion.PromiereVersion.dto;
 
-import com.Gestion.PromiereVersion.model.Product;
+import com.Gestion.PromiereVersion.model.Category;
+import com.Gestion.PromiereVersion.model.Tax;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -23,46 +23,32 @@ public class ProductDTO {
     private String codeBarre;
     private String barcode;
     private String barcodeImagePath;
+    private String imageUrl;
     private Long categoryId;
     private Long taxId;
+    private Long supplierId;
     private Boolean isVisible;
     private BigDecimal profitMargin;
-    private List<Long> taxIds;
-    private String barcodeImage;
-    private Set<Long> taxIdsSet;
-    private String imagePath;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    public static ProductDTO fromProduct(Product product) {
-        return ProductDTO.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .description(product.getDescription())
-                .price(product.getPrice())
-                .stock(product.getStock() != null ? product.getStock() : 0)
-                .codeBarre(product.getCodeBarre())
-                .barcode(product.getBarcode())
-                .barcodeImagePath(product.getBarcodeImagePath())
-                .isVisible(product.getIsVisible())
-                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
-                .taxId(product.getTax() != null ? product.getTax().getId() : null)
-                .profitMargin(product.getProfitMargin())
-                .imagePath(product.getImagePath())
-                .build();
-    }
-
-    public Product toProduct() {
-        return Product.builder()
-                .id(id)
-                .name(name)
-                .description(description)
-                .price(price)
-                .stock(stock != null ? stock : 0)
-                .codeBarre(codeBarre)
-                .barcode(barcode)
-                .barcodeImagePath(barcodeImagePath)
-                .isVisible(isVisible)
-                .profitMargin(profitMargin)
-                .imagePath(imagePath)
-                .build();
+    public static ProductDTO fromProduct(com.Gestion.PromiereVersion.model.Product product) {
+        ProductDTO dto = new ProductDTO();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setDescription(product.getDescription());
+        dto.setPrice(product.getPrice());
+        dto.setStock(product.getStock());
+        dto.setCodeBarre(product.getCodeBarre());
+        dto.setBarcode(product.getBarcode());
+        dto.setBarcodeImagePath(product.getBarcodeImagePath());
+        dto.setImageUrl(product.getImageUrl());
+        dto.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+        dto.setTaxId(product.getTax() != null ? product.getTax().getId() : null);
+        dto.setSupplierId(product.getSupplier() != null ? product.getSupplier().getId() : null);
+        dto.setIsVisible(product.getIsVisible());
+        dto.setCreatedAt(product.getCreatedAt());
+        dto.setUpdatedAt(product.getUpdatedAt());
+        return dto;
     }
 } 

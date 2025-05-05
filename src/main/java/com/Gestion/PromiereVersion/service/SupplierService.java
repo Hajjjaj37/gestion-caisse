@@ -1,128 +1,99 @@
 package com.Gestion.PromiereVersion.service;
 
-import com.Gestion.PromiereVersion.dto.SupplierDTO;
-import com.Gestion.PromiereVersion.model.Product;
+import com.Gestion.PromiereVersion.dto.ProductDTO;
+import com.Gestion.PromiereVersion.dto.SupplierRequestDTO;
+import com.Gestion.PromiereVersion.dto.SupplierResponseDTO;
 import com.Gestion.PromiereVersion.model.Supplier;
-import com.Gestion.PromiereVersion.repository.ProductRepository;
 import com.Gestion.PromiereVersion.repository.SupplierRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SupplierService {
-
     private final SupplierRepository supplierRepository;
-    private final ProductRepository productRepository;
+    private final ProductService productService;
 
-    @Transactional
-    public SupplierDTO createSupplier(SupplierDTO supplierDTO) {
-        log.info("Creating supplier: {}", supplierDTO.getName());
-        
-        if (supplierRepository.existsByEmail(supplierDTO.getEmail())) {
-            throw new IllegalArgumentException("Email already exists");
-        }
-
-        Supplier supplier = supplierDTO.toSupplier();
-        
-        // Associer les produits si des IDs sont fournis
-        if (supplierDTO.getProductIds() != null && !supplierDTO.getProductIds().isEmpty()) {
-            List<Product> products = productRepository.findAllById(supplierDTO.getProductIds());
-            if (products.size() != supplierDTO.getProductIds().size()) {
-                throw new IllegalArgumentException("One or more products not found");
-            }
-            // Associer les produits au fournisseur
-            products.forEach(product -> {
-                product.setSupplier(supplier);
-                productRepository.save(product);
-            });
-            supplier.setProducts(products);
-        }
+    public SupplierResponseDTO createSupplier(SupplierRequestDTO request) {
+        Supplier supplier = Supplier.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .phone(request.getPhone())
+                .address(request.getAddress())
+                .companyName(request.getCompanyName())
+                .taxNumber(request.getTaxNumber())
+                .bankAccount(request.getBankAccount())
+                .paymentTerms(request.getPaymentTerms())
+                .build();
 
         Supplier savedSupplier = supplierRepository.save(supplier);
-        return SupplierDTO.fromSupplier(savedSupplier);
+        return convertToDTO(savedSupplier);
     }
 
-    @Transactional(readOnly = true)
-    public List<SupplierDTO> getAllSuppliers() {
-        log.info("Fetching all suppliers");
+    public List<SupplierResponseDTO> getAllSuppliers() {
         return supplierRepository.findAll().stream()
-                .map(SupplierDTO::fromSupplier)
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
-    public SupplierDTO getSupplierById(Long id) {
-        log.info("Fetching supplier with id: {}", id);
+    public SupplierResponseDTO getSupplierById(Long id) {
         return supplierRepository.findById(id)
-                .map(SupplierDTO::fromSupplier)
-                .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
+                .map(this::convertToDTO)
+                .orElseThrow(() -> new RuntimeException("Supplier not found with id: " + id));
     }
 
-    @Transactional
-    public SupplierDTO updateSupplier(Long id, SupplierDTO supplierDTO) {
-        log.info("Updating supplier with id: {}", id);
+    public List<ProductDTO> getSupplierProducts(Long id) {
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Supplier not found with id: " + id));
         
+        return supplier.getProducts().stream()
+                .map(ProductDTO::fromProduct)
+                .collect(Collectors.toList());
+    }
+
+    public SupplierResponseDTO updateSupplier(Long id, SupplierRequestDTO request) {
         Supplier existingSupplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
+                .orElseThrow(() -> new RuntimeException("Supplier not found with id: " + id));
 
-        if (!existingSupplier.getEmail().equals(supplierDTO.getEmail()) &&
-            supplierRepository.existsByEmail(supplierDTO.getEmail())) {
-            throw new IllegalArgumentException("Email already exists");
-        }
-
-        existingSupplier.setName(supplierDTO.getName());
-        existingSupplier.setContactPerson(supplierDTO.getContactPerson());
-        existingSupplier.setEmail(supplierDTO.getEmail());
-        existingSupplier.setPhone(supplierDTO.getPhone());
-        existingSupplier.setAddress(supplierDTO.getAddress());
-        existingSupplier.setCity(supplierDTO.getCity());
-        existingSupplier.setCountry(supplierDTO.getCountry());
-
-        // Mettre à jour les produits associés
-        if (supplierDTO.getProductIds() != null) {
-            List<Product> products = productRepository.findAllById(supplierDTO.getProductIds());
-            if (products.size() != supplierDTO.getProductIds().size()) {
-                throw new IllegalArgumentException("One or more products not found");
-            }
-            
-            // Désassocier les anciens produits
-            existingSupplier.getProducts().forEach(product -> {
-                product.setSupplier(null);
-                productRepository.save(product);
-            });
-            
-            // Associer les nouveaux produits
-            products.forEach(product -> {
-                product.setSupplier(existingSupplier);
-                productRepository.save(product);
-            });
-            
-            existingSupplier.setProducts(products);
-        }
+        existingSupplier.setName(request.getName());
+        existingSupplier.setEmail(request.getEmail());
+        existingSupplier.setPhone(request.getPhone());
+        existingSupplier.setAddress(request.getAddress());
+        existingSupplier.setCompanyName(request.getCompanyName());
+        existingSupplier.setTaxNumber(request.getTaxNumber());
+        existingSupplier.setBankAccount(request.getBankAccount());
+        existingSupplier.setPaymentTerms(request.getPaymentTerms());
 
         Supplier updatedSupplier = supplierRepository.save(existingSupplier);
-        return SupplierDTO.fromSupplier(updatedSupplier);
+        return convertToDTO(updatedSupplier);
     }
 
-    @Transactional
     public void deleteSupplier(Long id) {
-        log.info("Deleting supplier with id: {}", id);
-        Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
-                
-        // Désassocier tous les produits avant de supprimer le fournisseur
-        supplier.getProducts().forEach(product -> {
-            product.setSupplier(null);
-            productRepository.save(product);
-        });
-        
-        supplierRepository.delete(supplier);
+        if (!supplierRepository.existsById(id)) {
+            throw new RuntimeException("Supplier not found with id: " + id);
+        }
+        supplierRepository.deleteById(id);
+    }
+
+    private SupplierResponseDTO convertToDTO(Supplier supplier) {
+        return SupplierResponseDTO.builder()
+                .id(supplier.getId())
+                .name(supplier.getName())
+                .email(supplier.getEmail())
+                .phone(supplier.getPhone())
+                .address(supplier.getAddress())
+                .companyName(supplier.getCompanyName())
+                .taxNumber(supplier.getTaxNumber())
+                .bankAccount(supplier.getBankAccount())
+                .paymentTerms(supplier.getPaymentTerms())
+                .products(supplier.getProducts().stream()
+                        .map(ProductDTO::fromProduct)
+                        .collect(Collectors.toList()))
+                .createdAt(supplier.getCreatedAt())
+                .updatedAt(supplier.getUpdatedAt())
+                .build();
     }
 } 

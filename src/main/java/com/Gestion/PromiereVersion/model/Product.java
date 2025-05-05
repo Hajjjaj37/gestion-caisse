@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
@@ -33,48 +32,38 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
-    @Column(name = "code_barre")
+    @Column(name = "code_barre", nullable = false, unique = true)
     private String codeBarre;
 
+    @Column(unique = true)
     private String barcode;
 
     @Column(name = "barcode_image_path")
     private String barcodeImagePath;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "is_visible")
     private Boolean isVisible;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne
-    @JoinColumn(name = "tax_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tax_id")
     private Tax tax;
-
-    @Column(name = "profit_margin", precision = 5, scale = 2)
-    private BigDecimal profitMargin;
-
-    @ManyToMany
-    @JoinTable(
-        name = "product_taxes",
-        joinColumns = @JoinColumn(name = "product_id"),
-        inverseJoinColumns = @JoinColumn(name = "tax_id")
-    )
-    private List<Tax> taxes;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
-    @Column(name = "image_path")
-    private String imagePath;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
@@ -85,9 +74,5 @@ public class Product {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-    }
-
-    public void setSupplier(Supplier supplier) {
-        this.supplier = supplier;
     }
 } 

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class BreakRequest {
-    private Long userId;
+    private Long employeeId;
     private BreakType type;
     private String comment;
 } 

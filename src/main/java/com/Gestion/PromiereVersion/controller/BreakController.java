@@ -26,8 +26,12 @@ public class BreakController {
 
     @PostMapping
     public ResponseEntity<Break> startBreak(@RequestBody BreakRequest request) {
-        User user = userService.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (request.getEmployeeId() == null) {
+            throw new RuntimeException("Employee ID is required");
+        }
+
+        User user = userService.findById(request.getEmployeeId())
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
 
         // Vérifier si l'utilisateur a déjà une pause en cours
         boolean hasActiveBreak = user.getBreaks().stream()

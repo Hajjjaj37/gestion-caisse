@@ -89,4 +89,42 @@ public class UserService {
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
+
+    @Transactional
+    public User updateUser(Long id, String firstName, String lastName, String email, String password) {
+        User existingUser = getUserById(id);
+        
+        // Check if the new email is already taken by another user
+        if (!existingUser.getEmail().equals(email) && userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        existingUser.setFirstName(firstName);
+        existingUser.setLastName(lastName);
+        existingUser.setEmail(email);
+        
+        // Only update password if a new one is provided
+        if (password != null && !password.trim().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(password));
+        }
+
+        return userRepository.save(existingUser);
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = getUserById(id);
+        
+        // If the user is an employee, delete the employee record first
+        if (user.getRole() == Role.EMPLOYEE) {
+            try {
+                employeeService.deleteEmployeeByUserId(id);
+            } catch (Exception e) {
+                log.error("Error deleting employee record for user {}: {}", id, e.getMessage());
+                throw new RuntimeException("Failed to delete user: " + e.getMessage());
+            }
+        }
+        
+        userRepository.delete(user);
+    }
 } 

@@ -1,5 +1,6 @@
 package com.Gestion.PromiereVersion.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -13,8 +14,9 @@ public class Break {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "employee_id", nullable = false)
+    @JsonBackReference
+    private Employee employee;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

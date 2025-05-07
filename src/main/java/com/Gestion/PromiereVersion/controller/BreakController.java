@@ -3,9 +3,9 @@ package com.Gestion.PromiereVersion.controller;
 import com.Gestion.PromiereVersion.dto.BreakRequest;
 import com.Gestion.PromiereVersion.model.Break;
 import com.Gestion.PromiereVersion.model.BreakStatus;
-import com.Gestion.PromiereVersion.model.User;
+import com.Gestion.PromiereVersion.model.Employee;
 import com.Gestion.PromiereVersion.service.BreakService;
-import com.Gestion.PromiereVersion.service.UserService;
+import com.Gestion.PromiereVersion.service.EmployeeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +17,11 @@ import java.time.temporal.ChronoUnit;
 public class BreakController {
 
     private final BreakService breakService;
-    private final UserService userService;
+    private final EmployeeService employeeService;
 
-    public BreakController(BreakService breakService, UserService userService) {
+    public BreakController(BreakService breakService, EmployeeService employeeService) {
         this.breakService = breakService;
-        this.userService = userService;
+        this.employeeService = employeeService;
     }
 
     @PostMapping
@@ -30,19 +30,11 @@ public class BreakController {
             throw new RuntimeException("Employee ID is required");
         }
 
-        User user = userService.findById(request.getEmployeeId())
+        Employee employee = employeeService.findById(request.getEmployeeId())
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
-        // Vérifier si l'utilisateur a déjà une pause en cours
-        boolean hasActiveBreak = user.getBreaks().stream()
-                .anyMatch(b -> b.getStatus() == BreakStatus.EN_COURS);
-        
-        if (hasActiveBreak) {
-            throw new RuntimeException("User already has an active break");
-        }
-
         Break newBreak = new Break();
-        newBreak.setUser(user);
+        newBreak.setEmployee(employee);
         newBreak.setType(request.getType());
         newBreak.setStatus(BreakStatus.EN_COURS);
         newBreak.setStartTime(LocalDateTime.now());
@@ -69,5 +61,42 @@ public class BreakController {
 
         Break updatedBreak = breakService.save(existingBreak);
         return ResponseEntity.ok(updatedBreak);
+    }
+
+    @PutMapping("/{breakId}")
+    public ResponseEntity<Break> updateBreak(@PathVariable Long breakId, @RequestBody BreakRequest request) {
+        Break existingBreak = breakService.findById(breakId)
+                .orElseThrow(() -> new RuntimeException("Break not found"));
+
+        if (request.getType() != null) {
+            existingBreak.setType(request.getType());
+        }
+        if (request.getStatus() != null) {
+            existingBreak.setStatus(request.getStatus());
+        }
+        if (request.getStartTime() != null) {
+            existingBreak.setStartTime(request.getStartTime());
+        }
+        if (request.getEndTime() != null) {
+            existingBreak.setEndTime(request.getEndTime());
+        }
+        if (request.getDurationMinutes() != null) {
+            existingBreak.setDurationMinutes(request.getDurationMinutes());
+        }
+        if (request.getComment() != null) {
+            existingBreak.setComment(request.getComment());
+        }
+
+        Break updatedBreak = breakService.save(existingBreak);
+        return ResponseEntity.ok(updatedBreak);
+    }
+
+    @DeleteMapping("/{breakId}")
+    public ResponseEntity<Void> deleteBreak(@PathVariable Long breakId) {
+        Break existingBreak = breakService.findById(breakId)
+                .orElseThrow(() -> new RuntimeException("Break not found"));
+        
+        breakService.delete(existingBreak);
+        return ResponseEntity.noContent().build();
     }
 } 

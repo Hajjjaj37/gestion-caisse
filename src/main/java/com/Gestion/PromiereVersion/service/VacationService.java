@@ -24,6 +24,12 @@ public class VacationService {
     private final VacationRepository vacationRepository;
     private final UserRepository userRepository;
 
+    public List<VacationDTO> getAllVacations() {
+        return vacationRepository.findAll().stream()
+                .map(VacationDTO::fromVacation)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public VacationDTO createVacation(VacationDTO vacationDTO) {
         log.info("Création d'une nouvelle demande de vacances: {}", vacationDTO);
@@ -56,6 +62,37 @@ public class VacationService {
         log.info("Demande de vacances créée avec succès: {}", savedVacation);
 
         return VacationDTO.fromVacation(savedVacation);
+    }
+
+    @Transactional
+    public VacationDTO updateVacation(Long id, VacationDTO vacationDTO) {
+        log.info("Mise à jour de la demande de vacances {}: {}", id, vacationDTO);
+
+        // Récupération de la vacance existante
+        Vacation vacation = vacationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Demande de vacances non trouvée"));
+
+        // Validation des dates
+        if (vacationDTO.getStartDate().isAfter(vacationDTO.getEndDate())) {
+            throw new IllegalArgumentException("La date de début doit être antérieure à la date de fin");
+        }
+
+        // Calcul de la durée
+        long days = ChronoUnit.DAYS.between(vacationDTO.getStartDate(), vacationDTO.getEndDate()) + 1;
+        vacationDTO.setDuration((int) days);
+
+        // Mise à jour des champs
+        vacation.setStartDate(vacationDTO.getStartDate());
+        vacation.setEndDate(vacationDTO.getEndDate());
+        vacation.setDuration(vacationDTO.getDuration());
+        vacation.setComment(vacationDTO.getComment());
+        vacation.setStatus(VacationStatus.PENDING); // Réinitialiser le statut à PENDING lors de la modification
+
+        // Sauvegarde
+        Vacation updatedVacation = vacationRepository.save(vacation);
+        log.info("Demande de vacances mise à jour avec succès: {}", updatedVacation);
+
+        return VacationDTO.fromVacation(updatedVacation);
     }
 
     @Transactional
@@ -93,8 +130,34 @@ public class VacationService {
     }
 
     public List<VacationDTO> getEmployeeVacationsBetweenDates(Long employeeId, LocalDate start, LocalDate end) {
-        return vacationRepository.findByEmployeeIdAndStartDateBetween(employeeId, start, end).stream()
+        log.info("Récupération des vacances de l'employé {} entre {} et {}", employeeId, start, end);
+        List<Vacation> vacations = vacationRepository.findByEmployeeIdAndStartDateBetween(employeeId, start, end);
+        return vacations.stream()
+            .map(VacationDTO::fromVacation)
+            .collect(Collectors.toList());
+    }
+
+    public List<VacationDTO> getVacationsByEmployee(Long employeeId) {
+        log.info("Récupération des vacances pour l'employé ID: {}", employeeId);
+        List<Vacation> vacations = vacationRepository.findByEmployeeId(employeeId);
+        return vacations.stream()
                 .map(VacationDTO::fromVacation)
                 .collect(Collectors.toList());
+    }
+
+    public VacationDTO getVacationById(Long id) {
+        log.info("Récupération de la vacance avec l'ID: {}", id);
+        return vacationRepository.findById(id)
+            .map(VacationDTO::fromVacation)
+            .orElse(null);
+    }
+
+    @Transactional
+    public void deleteVacation(Long id) {
+        log.info("Suppression de la vacance avec l'ID: {}", id);
+        if (!vacationRepository.existsById(id)) {
+            throw new IllegalArgumentException("Vacation not found with id: " + id);
+        }
+        vacationRepository.deleteById(id);
     }
 } 

@@ -36,11 +36,7 @@ public class BarcodeImageController {
         } catch (IOException e) {
             log.error("Erreur lors de la récupération de l'image du code-barres {}: {}", codeBarre, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse.builder()
-                            .message("Image du code-barres non trouvée: " + e.getMessage())
-                            .error("Not Found")
-                            .status(HttpStatus.NOT_FOUND.value())
-                            .build());
+                    .body(new ErrorResponse("Image du code-barres non trouvée: " + e.getMessage()));
         }
     }
 
@@ -59,11 +55,7 @@ public class BarcodeImageController {
         } catch (IOException e) {
             log.error("Erreur lors de la récupération de l'image du code-barres pour le produit {}: {}", productId, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse.builder()
-                            .message("Image du code-barres non trouvée pour le produit: " + e.getMessage())
-                            .error("Not Found")
-                            .status(HttpStatus.NOT_FOUND.value())
-                            .build());
+                    .body(new ErrorResponse("Image du code-barres non trouvée pour le produit: " + e.getMessage()));
         }
     }
 } 

@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDate;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +20,10 @@ import java.math.BigDecimal;
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
+
+    public Optional<Employee> findById(Long id) {
+        return employeeRepository.findById(id);
+    }
 
     @Transactional
     public Employee createEmployee(Long userId, String position, String department) {
@@ -65,5 +71,23 @@ public class EmployeeService {
         log.info("Verified employee exists in database with ID: {}", retrievedEmployee.getId());
         
         return savedEmployee;
+    }
+
+    @Transactional
+    public void deleteEmployeeByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        Employee employee = employeeRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("Employee not found for user"));
+        
+        employeeRepository.delete(employee);
+        log.info("Employee deleted successfully for user ID: {}", userId);
+    }
+
+    public List<Employee> getAllEmployeesWithBreaks() {
+        List<Employee> employees = employeeRepository.findAll();
+        // Les pauses sont automatiquement chargées grâce à la relation @OneToMany dans l'entité Employee
+        return employees;
     }
 } 

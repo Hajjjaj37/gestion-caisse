@@ -24,21 +24,18 @@ public class AuthenticationController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             log.info("Attempting to register user with email: {}", request.getEmail());
-            // Ne pas forcer le rôle USER si un rôle est spécifié
-            if (request.getRole() == null) {
-                request.setRole(Role.USER);
+            // Vérifier si le rôle est valide (EMPLOYEE ou ADMIN)
+            if (request.getRole() != Role.EMPLOYEE && request.getRole() != Role.ADMIN) {
+                return ResponseEntity.badRequest()
+                    .body(new ErrorResponse("Le rôle doit être soit EMPLOYEE soit ADMIN"));
             }
             log.info("Registering user with role: {}", request.getRole());
             AuthenticationResponse response = authenticationService.register(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             log.error("Registration error: {}", e.getMessage());
-            ErrorResponse errorResponse = ErrorResponse.builder()
-                    .message(e.getMessage())
-                    .error("Bad Request")
-                    .status(HttpStatus.BAD_REQUEST.value())
-                    .build();
-            return ResponseEntity.badRequest().body(errorResponse);
+            return ResponseEntity.badRequest()
+                .body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -57,12 +54,8 @@ public class AuthenticationController {
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             log.error("Admin registration error: {}", e.getMessage());
-            ErrorResponse errorResponse = ErrorResponse.builder()
-                    .message(e.getMessage())
-                    .error("Bad Request")
-                    .status(HttpStatus.BAD_REQUEST.value())
-                    .build();
-            return ResponseEntity.badRequest().body(errorResponse);
+            return ResponseEntity.badRequest()
+                .body(new ErrorResponse(e.getMessage()));
         }
     }
 } 

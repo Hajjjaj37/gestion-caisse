@@ -7,11 +7,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/employees")
 @RequiredArgsConstructor
 public class EmployeeController {
     private final EmployeeService employeeService;
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Employee>> getAllEmployees() {
+        List<Employee> employees = employeeService.getAllEmployeesWithBreaks();
+        return ResponseEntity.ok(employees);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+        Employee employee = employeeService.findById(id)
+            .orElseThrow(() -> new RuntimeException("Employee not found with id: " + id));
+        return ResponseEntity.ok(employee);
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -21,5 +38,12 @@ public class EmployeeController {
             @RequestParam String department) {
         Employee employee = employeeService.createEmployee(userId, position, department);
         return ResponseEntity.ok(employee);
+    }
+
+    @GetMapping("/with-breaks")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Employee>> getAllEmployeesWithBreaks() {
+        List<Employee> employees = employeeService.getAllEmployeesWithBreaks();
+        return ResponseEntity.ok(employees);
     }
 } 

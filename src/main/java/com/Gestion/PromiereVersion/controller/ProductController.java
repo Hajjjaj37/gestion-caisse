@@ -123,10 +123,38 @@ public class ProductController {
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductDTO> updateProduct(
             @PathVariable Long id,
-            @RequestPart("product") ProductDTO productDTO,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("price") BigDecimal price,
+            @RequestParam("stock") Integer stock,
+            @RequestParam("isVisible") Boolean isVisible,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam("taxId") Long taxId,
+            @RequestParam("supplierId") Long supplierId,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
         try {
+            ProductDTO productDTO = ProductDTO.builder()
+                    .name(name)
+                    .description(description)
+                    .price(price)
+                    .stock(stock)
+                    .isVisible(isVisible)
+                    .categoryId(categoryId)
+                    .taxId(taxId)
+                    .supplierId(supplierId)
+                    .build();
             Product product = productService.updateProduct(id, productDTO, image);
+
+            // Générer et enregistrer l'image du code-barres
+            try {
+                if (product.getCodeBarre() != null) {
+                    String barcodeImagePath = barcodeService.generateBarcodeImage(product.getCodeBarre());
+                    product.setBarcodeImagePath(barcodeImagePath);
+                }
+            } catch (Exception e) {
+                log.error("Erreur lors de la génération de l'image du code-barres", e);
+            }
+
             return ResponseEntity.ok(ProductDTO.fromProduct(product));
         } catch (Exception e) {
             log.error("Erreur lors de la mise à jour du produit", e);

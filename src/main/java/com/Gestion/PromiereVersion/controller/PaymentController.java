@@ -1,25 +1,37 @@
 package com.Gestion.PromiereVersion.controller;
 
-import com.Gestion.PromiereVersion.dto.OrderResponseDTO;
-import com.Gestion.PromiereVersion.dto.PaymentRequestDTO;
-import com.Gestion.PromiereVersion.mapper.OrderMapper;
-import com.Gestion.PromiereVersion.model.Order;
+import com.Gestion.PromiereVersion.dto.PaymentRequest;
+import com.Gestion.PromiereVersion.dto.PaymentResponse;
 import com.Gestion.PromiereVersion.service.PaymentService;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/payments")
-@RequiredArgsConstructor
 public class PaymentController {
-    private final PaymentService paymentService;
-    private final OrderMapper orderMapper;
 
-    @PostMapping("/process")
-    public ResponseEntity<OrderResponseDTO> processPayment(@RequestBody PaymentRequestDTO paymentRequest) {
-        Order order = paymentService.processPayment(paymentRequest);
-        OrderResponseDTO orderResponse = orderMapper.toOrderResponseDTO(order);
-        return ResponseEntity.ok(orderResponse);
+    @Autowired
+    private PaymentService paymentService;
+
+    @PostMapping
+    public ResponseEntity<PaymentResponse> processPayment(@Valid @RequestBody PaymentRequest request) {
+        PaymentResponse response = paymentService.processPayment(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PaymentResponse> getPayment(@PathVariable Long id) {
+        PaymentResponse response = paymentService.getPaymentById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<PaymentResponse> updatePaymentStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        PaymentResponse response = paymentService.updatePaymentStatus(id, status);
+        return ResponseEntity.ok(response);
     }
 } 

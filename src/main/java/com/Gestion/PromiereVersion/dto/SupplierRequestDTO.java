@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,4 +19,5 @@ public class SupplierRequestDTO {
     private String taxNumber;
     private String bankAccount;
     private String paymentTerms;
+    private List<Long> productIds;
 } 

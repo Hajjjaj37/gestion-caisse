@@ -2,6 +2,7 @@ package com.Gestion.PromiereVersion.controller;
 
 import com.Gestion.PromiereVersion.model.Employee;
 import com.Gestion.PromiereVersion.service.EmployeeService;
+import com.Gestion.PromiereVersion.dto.EmployeeWithSchedulesDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,6 +45,13 @@ public class EmployeeController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Employee>> getAllEmployeesWithBreaks() {
         List<Employee> employees = employeeService.getAllEmployeesWithBreaks();
+        return ResponseEntity.ok(employees);
+    }
+
+    @GetMapping("/with-schedules")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<EmployeeWithSchedulesDTO>> getAllEmployeesWithSchedules() {
+        List<EmployeeWithSchedulesDTO> employees = employeeService.getAllEmployeesWithSchedules();
         return ResponseEntity.ok(employees);
     }
 } 

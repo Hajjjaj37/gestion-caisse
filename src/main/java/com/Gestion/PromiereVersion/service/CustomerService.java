@@ -15,12 +15,18 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
 
     public Customer createCustomer(CustomerDTO customerDTO) {
+        if (customerRepository.existsByEmail(customerDTO.getEmail())) {
+            throw new RuntimeException("Un client avec cet email existe déjà");
+        }
+        
         Customer customer = Customer.builder()
                 .firstName(customerDTO.getFirstName())
                 .lastName(customerDTO.getLastName())
                 .email(customerDTO.getEmail())
                 .phone(customerDTO.getPhone())
                 .address(customerDTO.getAddress())
+                .customerCardNumber(customerDTO.getCustomerCardNumber())
+                .tax(customerDTO.getTax())
                 .build();
         return customerRepository.save(customer);
     }
